@@ -92,12 +92,20 @@ button{font:inherit;cursor:pointer}
 .escena{
   height:400px;display:flex;align-items:center;justify-content:center;
   background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-  overflow:hidden;
+  overflow:hidden;padding:10px;
 }
-.escena img{max-height:380px;max-width:100%;display:block;border-radius:4px}
+.escena img{max-height:100%;max-width:100%;display:block;border-radius:4px}
 .cruz{font-size:2.5rem;color:var(--muted);font-family:"IBM Plex Mono",monospace}
 .opciones{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-@media (max-width:560px){ .opciones{grid-template-columns:repeat(2,1fr)} .escena{height:320px} .escena img{max-height:300px} }
+@media (max-width:560px){
+  .wrap{padding:20px 16px 40px}
+  .opciones{grid-template-columns:repeat(2,1fr)}
+  .opcion{padding:11px 6px}
+  .escena{height:320px;height:clamp(190px,42dvh,340px)}
+}
+@media (max-height:720px){ .escena{height:clamp(180px,38dvh,300px)} }
+/* en pantallas táctiles no hay teclado numérico a mano */
+@media (hover:none){ .opcion kbd{display:none} #pistaTeclado{display:none} .opcion{padding:16px 8px} }
 .opcion{
   background:var(--surface);border:1px solid var(--line);border-radius:8px;
   padding:14px 8px;font-weight:500;color:var(--ink);
@@ -179,7 +187,7 @@ footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);
 
     <div class="opciones" id="opciones"></div>
     <p class="feedback" id="feedback"></p>
-    <p class="xsmall">Puedes responder con el mouse o con las teclas 1 a 6.</p>
+    <p class="xsmall" id="pistaTeclado">Puedes responder con el mouse o con las teclas 1 a 6.</p>
   </section>
 
   <!-- ============================ RESULTADO ============================ -->
