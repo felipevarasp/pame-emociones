@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reconocimiento de expresiones emocionales</title>
+<meta name="description" content="Experimento breve de reconocimiento de expresiones faciales — Psicología del Aprendizaje, Motivación y Emoción, Universidad de O'Higgins.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#f2f3f5;
+  --surface:#ffffff;
+  --surface-2:#e9ebef;
+  --ink:#171a1f;
+  --ink-2:#4a515c;
+  --muted:#767e8b;
+  --line:#d8dce2;
+  --accent:#2b5f7d;
+  --accent-ink:#ffffff;
+  --accent-soft:#dfeaf1;
+  --good:#2f6b4f;
+  --bad:#8c3a3a;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(18,24,33,.06), 0 8px 24px -16px rgba(18,24,33,.28);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --ground:#13161b;
+    --surface:#1b1f26;
+    --surface-2:#232830;
+    --ink:#e8eaee;
+    --ink-2:#b3bac5;
+    --muted:#8b93a1;
+    --line:#333a45;
+    --accent:#7fb2ce;
+    --accent-ink:#10161b;
+    --accent-soft:#243542;
+    --good:#7fc0a0;
+    --bad:#d99a9a;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Public Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:16px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:46rem;margin:0 auto;padding:32px 20px 64px}
+h1,h2,h3{font-family:"Newsreader",Georgia,"Times New Roman",serif;font-weight:600;text-wrap:balance;margin:0}
+h1{font-size:2rem;line-height:1.15;letter-spacing:-.01em}
+h2{font-size:1.35rem;line-height:1.2}
+h3{font-size:1.05rem}
+p{margin:0}
+.eyebrow{
+  font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;
+}
+.stack{display:flex;flex-direction:column;gap:16px}
+.stack-lg{display:flex;flex-direction:column;gap:28px}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:24px;box-shadow:var(--shadow);
+}
+.rule{height:1px;background:var(--line);border:0;margin:0}
+.muted{color:var(--ink-2)}
+.small{font-size:.875rem}
+.xsmall{font-size:.8rem;color:var(--muted)}
+ul{margin:0;padding-left:1.15rem;display:flex;flex-direction:column;gap:8px;color:var(--ink-2)}
+button{font:inherit;cursor:pointer}
+.btn{
+  background:var(--accent);color:var(--accent-ink);border:1px solid transparent;
+  border-radius:8px;padding:11px 20px;font-weight:600;font-size:.95rem;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line);
+  border-radius:8px;padding:9px 16px;font-weight:500;font-size:.9rem}
+.btn-ghost:hover{background:var(--surface-2)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- ensayo ---------- */
+#pantallaEnsayo{display:none}
+.barra{height:4px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+.barra span{display:block;height:100%;background:var(--accent);width:0;transition:width .25s ease}
+@media (prefers-reduced-motion: reduce){ .barra span{transition:none} }
+.escena{
+  height:400px;display:flex;align-items:center;justify-content:center;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;
+}
+.escena img{max-height:380px;max-width:100%;display:block;border-radius:4px}
+.cruz{font-size:2.5rem;color:var(--muted);font-family:"IBM Plex Mono",monospace}
+.opciones{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:560px){ .opciones{grid-template-columns:repeat(2,1fr)} .escena{height:320px} .escena img{max-height:300px} }
+.opcion{
+  background:var(--surface);border:1px solid var(--line);border-radius:8px;
+  padding:14px 8px;font-weight:500;color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.opcion:hover:not(:disabled){border-color:var(--accent);background:var(--accent-soft)}
+.opcion:disabled{opacity:.45;cursor:default}
+.opcion kbd{
+  font-family:"IBM Plex Mono",monospace;font-size:.7rem;color:var(--muted);
+  background:var(--surface-2);border-radius:4px;padding:1px 5px;
+}
+.feedback{text-align:center;font-weight:600;min-height:1.5rem}
+.feedback.ok{color:var(--good)} .feedback.no{color:var(--bad)}
+
+/* ---------- resultados ---------- */
+#pantallaFin{display:none}
+.hero{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.hero .cifra{
+  font-family:"IBM Plex Mono",monospace;font-size:3.4rem;font-weight:500;
+  line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;
+}
+.tabla{width:100%;border-collapse:collapse;font-size:.9rem}
+.tabla th,.tabla td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--line)}
+.tabla th{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tabla td.num{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.tabla tr:last-child td{border-bottom:0}
+.mini{display:flex;align-items:center;gap:8px}
+.mini .track{flex:1;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;min-width:70px}
+.mini .fill{display:block;height:100%;background:var(--accent);border-radius:4px}
+.aviso{
+  border-left:3px solid var(--accent);background:var(--accent-soft);
+  padding:12px 14px;border-radius:0 8px 8px 0;font-size:.9rem;color:var(--ink-2);
+}
+footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);
+  font-size:.78rem;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.oculto{display:none !important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============================ PORTADA ============================ -->
+  <section id="pantallaInicio" class="stack-lg">
+    <header class="stack">
+      <p class="eyebrow">Unidad 2 · Psicología de la Emoción</p>
+      <h1>¿Existen las emociones básicas?</h1>
+      <p class="muted">Un experimento de reconocimiento de expresiones faciales, con ustedes como participantes. Toma alrededor de cinco minutos.</p>
+    </header>
+
+    <div class="card stack">
+      <h2>Qué vas a hacer</h2>
+      <ul>
+        <li>Verás <strong>18 fotografías</strong> de rostros, una a la vez.</li>
+        <li>En cada una eliges, entre seis opciones, <strong>qué expresión crees que muestra</strong>.</li>
+        <li>Responde <strong>rápido y con tu primera impresión</strong>: se registra cuánto demoras.</li>
+        <li>Antes de empezar hay dos ensayos de práctica con retroalimentación.</li>
+      </ul>
+      <hr class="rule">
+      <p class="small muted">La participación es anónima y voluntaria: no se registra tu nombre, tu correo ni ningún dato que permita identificarte. Solo se guardan tus respuestas y tus tiempos de reacción, que revisaremos agregados en clases. Al terminar verás tu propio resultado.</p>
+    </div>
+
+    <div class="stack">
+      <button id="btnEmpezar" class="btn" style="align-self:flex-start">Comenzar la práctica</button>
+      <p id="estadoCarga" class="xsmall">Preparando las imágenes…</p>
+    </div>
+  </section>
+
+  <!-- ============================ ENSAYOS ============================ -->
+  <section id="pantallaEnsayo" class="stack">
+    <div class="stack" style="gap:8px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <p class="eyebrow" id="etapa">Práctica</p>
+        <p class="xsmall" id="contador">1 / 2</p>
+      </div>
+      <div class="barra"><span id="progreso"></span></div>
+    </div>
+
+    <div class="escena" id="escena"><span class="cruz">+</span></div>
+
+    <div class="opciones" id="opciones"></div>
+    <p class="feedback" id="feedback"></p>
+    <p class="xsmall">Puedes responder con el mouse o con las teclas 1 a 6.</p>
+  </section>
+
+  <!-- ============================ RESULTADO ============================ -->
+  <section id="pantallaFin" class="stack-lg">
+    <header class="stack">
+      <p class="eyebrow">Resultado individual</p>
+      <h1>Tu desempeño</h1>
+    </header>
+
+    <div class="card stack">
+      <div class="hero">
+        <span class="cifra" id="cifraAcierto">—</span>
+        <div class="stack" style="gap:2px">
+          <p style="font-weight:600" id="detalleAcierto">—</p>
+          <p class="xsmall">Si estuvieras respondiendo al azar entre seis opciones, acertarías cerca del 16,7 %.</p>
+        </div>
+      </div>
+      <hr class="rule">
+      <p class="small muted" id="lecturaAcierto">—</p>
+    </div>
+
+    <div class="card stack">
+      <h2>Por expresión</h2>
+      <table class="tabla">
+        <thead><tr><th>Expresión</th><th>Aciertos</th><th style="text-align:right">Tiempo medio</th></tr></thead>
+        <tbody id="tablaEmociones"></tbody>
+      </table>
+      <p class="xsmall">El tiempo medio se mide desde que aparece el rostro hasta que respondes.</p>
+    </div>
+
+    <div class="stack">
+      <p class="aviso" id="estadoEnvio">Enviando tus respuestas…</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button id="btnDescargar" class="btn-ghost oculto">Descargar mis respuestas (CSV)</button>
+        <button id="btnRepetir" class="btn-ghost">Hacerlo otra vez</button>
+      </div>
+    </div>
+  </section>
+
+  <footer id="pie">
+    <p id="pieCurso">Psicología del Aprendizaje, Motivación y Emoción · Universidad de O'Higgins</p>
+    <p>Estímulos: FACES — Ebner, N. C., Riediger, M. y Lindenberger, U. (2010). <em>FACES: A database of facial expressions in young, middle-aged, and older women and men.</em> Behavior Research Methods, 42, 351–362. Subconjunto de acceso público, usado con fines docentes.</p>
+  </footer>
+</div>
+
+<script src="config.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var CFG = window.CONFIG || {};
+
+  // ---------------------------------------------------------------- estímulos
+  var STIM = [
+    {file:"s01.jpg",emo:"ira",modelo:"004",edad:"mayor",sexo:"masculino"},
+    {file:"s02.jpg",emo:"ira",modelo:"066",edad:"joven",sexo:"masculino"},
+    {file:"s03.jpg",emo:"ira",modelo:"079",edad:"mayor",sexo:"femenino"},
+    {file:"s04.jpg",emo:"ira",modelo:"116",edad:"adulto",sexo:"masculino"},
+    {file:"s05.jpg",emo:"ira",modelo:"140",edad:"joven",sexo:"femenino"},
+    {file:"s06.jpg",emo:"ira",modelo:"168",edad:"adulto",sexo:"femenino"},
+    {file:"s07.jpg",emo:"asco",modelo:"004",edad:"mayor",sexo:"masculino"},
+    {file:"s08.jpg",emo:"asco",modelo:"066",edad:"joven",sexo:"masculino"},
+    {file:"s09.jpg",emo:"asco",modelo:"079",edad:"mayor",sexo:"femenino"},
+    {file:"s10.jpg",emo:"asco",modelo:"116",edad:"adulto",sexo:"masculino"},
+    {file:"s11.jpg",emo:"asco",modelo:"140",edad:"joven",sexo:"femenino"},
+    {file:"s12.jpg",emo:"asco",modelo:"168",edad:"adulto",sexo:"femenino"},
+    {file:"s13.jpg",emo:"miedo",modelo:"004",edad:"mayor",sexo:"masculino"},
+    {file:"s14.jpg",emo:"miedo",modelo:"066",edad:"joven",sexo:"masculino"},
+    {file:"s15.jpg",emo:"miedo",modelo:"079",edad:"mayor",sexo:"femenino"},
+    {file:"s16.jpg",emo:"miedo",modelo:"116",edad:"adulto",sexo:"masculino"},
+    {file:"s17.jpg",emo:"miedo",modelo:"140",edad:"joven",sexo:"femenino"},
+    {file:"s18.jpg",emo:"miedo",modelo:"168",edad:"adulto",sexo:"femenino"},
+    {file:"s19.jpg",emo:"alegria",modelo:"004",edad:"mayor",sexo:"masculino"},
+    {file:"s20.jpg",emo:"alegria",modelo:"066",edad:"joven",sexo:"masculino"},
+    {file:"s21.jpg",emo:"alegria",modelo:"079",edad:"mayor",sexo:"femenino"},
+    {file:"s22.jpg",emo:"alegria",modelo:"116",edad:"adulto",sexo:"masculino"},
+    {file:"s23.jpg",emo:"alegria",modelo:"140",edad:"joven",sexo:"femenino"},
+    {file:"s24.jpg",emo:"alegria",modelo:"168",edad:"adulto",sexo:"femenino"},
+    {file:"s25.jpg",emo:"neutral",modelo:"004",edad:"mayor",sexo:"masculino"},
+    {file:"s26.jpg",emo:"neutral",modelo:"066",edad:"joven",sexo:"masculino"},
+    {file:"s27.jpg",emo:"neutral",modelo:"079",edad:"mayor",sexo:"femenino"},
+    {file:"s28.jpg",emo:"neutral",modelo:"116",edad:"adulto",sexo:"masculino"},
+    {file:"s29.jpg",emo:"neutral",modelo:"140",edad:"joven",sexo:"femenino"},
+    {file:"s30.jpg",emo:"neutral",modelo:"168",edad:"adulto",sexo:"femenino"},
+    {file:"s31.jpg",emo:"tristeza",modelo:"004",edad:"mayor",sexo:"masculino"},
+    {file:"s32.jpg",emo:"tristeza",modelo:"066",edad:"joven",sexo:"masculino"},
+    {file:"s33.jpg",emo:"tristeza",modelo:"079",edad:"mayor",sexo:"femenino"},
+    {file:"s34.jpg",emo:"tristeza",modelo:"116",edad:"adulto",sexo:"masculino"},
+    {file:"s35.jpg",emo:"tristeza",modelo:"140",edad:"joven",sexo:"femenino"},
+    {file:"s36.jpg",emo:"tristeza",modelo:"168",edad:"adulto",sexo:"femenino"}
+  ];
+
+  var EMOS = [
+    {k:"alegria", et:"Alegría"},
+    {k:"tristeza",et:"Tristeza"},
+    {k:"miedo",   et:"Miedo"},
+    {k:"ira",     et:"Ira"},
+    {k:"asco",    et:"Asco"},
+    {k:"neutral", et:"Neutral"}
+  ];
+  var ETIQUETA = {};
+  EMOS.forEach(function(e){ ETIQUETA[e.k] = e.et; });
+
+  var PRACTICA = ["s19","s31"];      // se excluyen del bloque experimental
+  var POR_EMOCION = 3;               // 6 expresiones x 3 = 18 ensayos
+  var MS_FIJACION = 600;
+  var MS_ENTRE = 250;
+
+  // ---------------------------------------------------------------- utilidades
+  function barajar(a){
+    var i, j, t;
+    for(i = a.length - 1; i > 0; i--){
+      j = Math.floor(Math.random() * (i + 1));
+      t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function muestra(arr, n){ return barajar(arr.slice()).slice(0, n); }
+  function media(xs){ return xs.length ? xs.reduce(function(a,b){return a+b;},0) / xs.length : 0; }
+  function pct(x){ return (x * 100).toFixed(1).replace(".", ",") + " %"; }
+  function ms(x){ return Math.round(x) + " ms"; }
+  function id(){ return Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-5); }
+
+  // Sin tres ensayos consecutivos de la misma expresión.
+  function ordenar(ensayos){
+    var intento, ok, i;
+    for(intento = 0; intento < 200; intento++){
+      barajar(ensayos);
+      ok = true;
+      for(i = 2; i < ensayos.length; i++){
+        if(ensayos[i].emo === ensayos[i-1].emo && ensayos[i].emo === ensayos[i-2].emo){ ok = false; break; }
+      }
+      if(ok) return ensayos;
+    }
+    return ensayos;
+  }
+
+  function construirBloque(){
+    var pool = STIM.filter(function(s){ return PRACTICA.indexOf(s.file.slice(0,3)) === -1; });
+    var ensayos = [];
+    EMOS.forEach(function(e){
+      var deEsta = pool.filter(function(s){ return s.emo === e.k; });
+      ensayos = ensayos.concat(muestra(deEsta, POR_EMOCION));
+    });
+    return ordenar(ensayos);
+  }
+
+  // ---------------------------------------------------------------- estado
+  var practica = [], bloque = [], idx = 0, enPractica = true;
+  var t0 = 0, esperando = false, datos = [], sesion = id();
+
+  var $ = function(s){ return document.querySelector(s); };
+  var pIni = $("#pantallaInicio"), pEns = $("#pantallaEnsayo"), pFin = $("#pantallaFin");
+  var escena = $("#escena"), opciones = $("#opciones"), feedback = $("#feedback");
+  var etapa = $("#etapa"), contador = $("#contador"), progreso = $("#progreso");
+
+  if(CFG.curso){ $("#pieCurso").textContent = $("#pieCurso").textContent + " · " + CFG.curso; }
+
+  // ---------------------------------------------------------------- botonera
+  EMOS.forEach(function(e, i){
+    var b = document.createElement("button");
+    b.className = "opcion";
+    b.type = "button";
+    b.dataset.emo = e.k;
+    b.innerHTML = '<span>' + e.et + '</span><kbd>' + (i + 1) + '</kbd>';
+    b.addEventListener("click", function(){ responder(e.k); });
+    opciones.appendChild(b);
+  });
+  var botones = Array.prototype.slice.call(opciones.querySelectorAll(".opcion"));
+  function habilitar(v){ botones.forEach(function(b){ b.disabled = !v; }); }
+
+  document.addEventListener("keydown", function(ev){
+    if(pEns.style.display !== "flex") return;
+    var n = parseInt(ev.key, 10);
+    if(n >= 1 && n <= EMOS.length) responder(EMOS[n-1].k);
+  });
+
+  // ---------------------------------------------------------------- precarga
+  function precargar(lista){
+    return Promise.all(lista.map(function(s){
+      return new Promise(function(res){
+        var im = new Image();
+        im.onload = im.onerror = function(){ res(); };
+        im.src = "img/" + s.file;
+      });
+    }));
+  }
+
+  practica = PRACTICA.map(function(p){
+    return STIM.filter(function(s){ return s.file.indexOf(p) === 0; })[0];
+  });
+  bloque = construirBloque();
+
+  precargar(practica.concat(bloque)).then(function(){
+    $("#estadoCarga").textContent = "Listo: 18 ensayos, unos cinco minutos.";
+    $("#btnEmpezar").disabled = false;
+  });
+  $("#btnEmpezar").disabled = true;
+
+  // ---------------------------------------------------------------- flujo
+  $("#btnEmpezar").addEventListener("click", function(){
+    pIni.style.display = "none";
+    pEns.style.display = "flex";
+    $("#pie").style.display = "none";
+    idx = 0; enPractica = true;
+    siguiente();
+  });
+
+  function listaActual(){ return enPractica ? practica : bloque; }
+
+  function siguiente(){
+    var lista = listaActual();
+    if(idx >= lista.length){
+      if(enPractica){ enPractica = false; idx = 0; siguiente(); return; }
+      terminar();
+      return;
+    }
+    etapa.textContent = enPractica ? "Práctica" : "Experimento";
+    contador.textContent = (idx + 1) + " / " + lista.length;
+    progreso.style.width = (enPractica ? 0 : (idx / lista.length) * 100) + "%";
+    feedback.textContent = "";
+    feedback.className = "feedback";
+    habilitar(false);
+    escena.innerHTML = '<span class="cruz">+</span>';
+    setTimeout(mostrar, MS_FIJACION);
+  }
+
+  function mostrar(){
+    var s = listaActual()[idx];
+    var im = new Image();
+    im.alt = "Rostro con una expresión facial";
+    im.src = "img/" + s.file;
+    escena.innerHTML = "";
+    escena.appendChild(im);
+    habilitar(true);
+    esperando = true;
+    t0 = performance.now();
+  }
+
+  function responder(emo){
+    if(!esperando) return;
+    esperando = false;
+    var rt = performance.now() - t0;
+    var s = listaActual()[idx];
+    var correcto = (emo === s.emo);
+    habilitar(false);
+
+    if(enPractica){
+      feedback.textContent = correcto
+        ? "Correcto: " + ETIQUETA[s.emo] + "."
+        : "Era " + ETIQUETA[s.emo] + ". Tu respuesta: " + ETIQUETA[emo] + ".";
+      feedback.className = "feedback " + (correcto ? "ok" : "no");
+    }else{
+      datos.push({
+        n: idx + 1, archivo: s.file, emocion: s.emo, respuesta: emo,
+        correcto: correcto ? 1 : 0, rt: Math.round(rt),
+        modelo: s.modelo, edad: s.edad, sexo: s.sexo
+      });
+    }
+    escena.innerHTML = "";
+    idx++;
+    setTimeout(siguiente, enPractica ? 1100 : MS_ENTRE);
+  }
+
+  // ---------------------------------------------------------------- resultado
+  function terminar(){
+    pEns.style.display = "none";
+    pFin.style.display = "flex";
+    $("#pie").style.display = "";
+
+    var aciertos = datos.filter(function(d){ return d.correcto === 1; }).length;
+    var prop = aciertos / datos.length;
+    $("#cifraAcierto").textContent = pct(prop);
+    $("#detalleAcierto").textContent = aciertos + " de " + datos.length + " expresiones identificadas";
+    $("#lecturaAcierto").textContent = prop > 0.5
+      ? "Reconociste las expresiones muy por encima del azar. Ese acuerdo, replicado en decenas de culturas, es el principal argumento a favor de un conjunto acotado de emociones básicas."
+      : "Tu porcentaje quedó cerca del azar en varias expresiones. Vale la pena mirar en clases cuáles se confundieron entre sí: ahí es donde la tesis de las emociones básicas se pone más discutible.";
+
+    var cuerpo = $("#tablaEmociones");
+    EMOS.forEach(function(e){
+      var ds = datos.filter(function(d){ return d.emocion === e.k; });
+      var ok = ds.filter(function(d){ return d.correcto === 1; }).length;
+      var p = ds.length ? ok / ds.length : 0;
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td>' + e.et + '</td>' +
+        '<td><div class="mini"><span class="track"><span class="fill" style="width:' + (p*100) + '%"></span></span>' +
+        '<span class="small" style="font-family:IBM Plex Mono,monospace">' + ok + '/' + ds.length + '</span></div></td>' +
+        '<td class="num">' + ms(media(ds.map(function(d){ return d.rt; }))) + '</td>';
+      cuerpo.appendChild(tr);
+    });
+
+    enviar();
+  }
+
+  function filas(){
+    var ts = new Date().toISOString();
+    return datos.map(function(d){
+      return [ts, sesion, CFG.curso || "", d.n, d.archivo, d.emocion, d.respuesta,
+              d.correcto, d.rt, d.modelo, d.edad, d.sexo];
+    });
+  }
+
+  function csv(){
+    var enc = ["fecha","sesion","curso","ensayo","archivo","emocion_mostrada",
+               "respuesta","correcto","rt_ms","modelo","edad_modelo","sexo_modelo"];
+    return [enc].concat(filas()).map(function(f){ return f.join(","); }).join("\n");
+  }
+
+  function enviar(){
+    var estado = $("#estadoEnvio");
+    if(!CFG.endpoint){
+      estado.textContent = "Este equipo no tiene configurado el envío automático. Descarga tu archivo y entrégalo al equipo docente.";
+      $("#btnDescargar").classList.remove("oculto");
+      return;
+    }
+    fetch(CFG.endpoint, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify({sesion: sesion, curso: CFG.curso || "", filas: filas()})
+    }).then(function(){
+      estado.textContent = "Respuestas registradas. Gracias por participar: revisaremos los resultados del curso en clases.";
+    }).catch(function(){
+      estado.textContent = "No se pudo enviar tus respuestas (puede ser la conexión). Descarga el archivo y entrégalo al equipo docente.";
+      $("#btnDescargar").classList.remove("oculto");
+    });
+  }
+
+  $("#btnDescargar").addEventListener("click", function(){
+    var b = new Blob([csv()], {type:"text/csv;charset=utf-8"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(b);
+    a.download = "respuestas_" + sesion + ".csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  });
+
+  $("#btnRepetir").addEventListener("click", function(){ location.reload(); });
+})();
+</script>
+</body>
+</html>

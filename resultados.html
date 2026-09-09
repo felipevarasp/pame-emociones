@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resultados del curso — Expresiones emocionales</title>
+<meta name="description" content="Resultados agregados del experimento de reconocimiento de expresiones faciales.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#f2f3f5; --surface:#ffffff; --surface-2:#e9ebef;
+  --ink:#171a1f; --ink-2:#4a515c; --muted:#767e8b; --line:#d8dce2;
+  --accent:#2b5f7d; --accent-ink:#ffffff; --accent-soft:#dfeaf1;
+  --ref:#a4483c;
+  --seq1:#eef3f7; --seq2:#cfe0eb; --seq3:#a3c4d8; --seq4:#6d9db9; --seq5:#2b5f7d;
+  --seq-ink-alto:#ffffff; --seq-ink-bajo:#243038;
+  --radius:10px; --shadow:0 1px 2px rgba(18,24,33,.06), 0 8px 24px -16px rgba(18,24,33,.28);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --ground:#13161b; --surface:#1b1f26; --surface-2:#232830;
+    --ink:#e8eaee; --ink-2:#b3bac5; --muted:#8b93a1; --line:#333a45;
+    --accent:#7fb2ce; --accent-ink:#10161b; --accent-soft:#243542;
+    --ref:#d98b7f;
+    --seq1:#1e242b; --seq2:#24404f; --seq3:#2f5f76; --seq4:#4e8aa6; --seq5:#7fb2ce;
+    --seq-ink-alto:#10161b; --seq-ink-bajo:#c9d2dc;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--ground);color:var(--ink);
+  font-family:"Public Sans","Segoe UI",system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.55}
+.wrap{max-width:56rem;margin:0 auto;padding:32px 20px 64px;display:flex;flex-direction:column;gap:28px}
+h1,h2{font-family:"Newsreader",Georgia,serif;font-weight:600;margin:0;text-wrap:balance}
+h1{font-size:2rem;line-height:1.15}
+h2{font-size:1.25rem}
+p{margin:0}
+.eyebrow{font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:18px}
+.small{font-size:.875rem}
+.xsmall{font-size:.8rem;color:var(--muted)}
+.muted{color:var(--ink-2)}
+.fila{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line);
+  border-radius:8px;padding:8px 14px;font-weight:500;font-size:.875rem}
+.btn-ghost:hover{background:var(--surface-2)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.hero{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.cifra{font-family:"IBM Plex Mono",monospace;font-size:3.6rem;font-weight:500;line-height:1;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.pastilla{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;
+  background:var(--accent-soft);color:var(--ink-2);border-radius:999px;padding:3px 10px}
+
+/* barras */
+.grafico{display:flex;flex-direction:column;gap:10px;position:relative}
+.gfila{display:grid;grid-template-columns:5.5rem 1fr 4.6rem;align-items:center;gap:12px}
+.getiqueta{font-size:.875rem;color:var(--ink-2)}
+.gpista{position:relative;height:22px;background:var(--surface-2);border-radius:4px}
+.gbarra{position:absolute;left:0;top:0;bottom:0;background:var(--accent);
+  border-radius:0 4px 4px 0;min-width:2px}
+.gvalor{font-family:"IBM Plex Mono",monospace;font-size:.82rem;text-align:right;
+  font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.referencia{position:absolute;top:0;bottom:0;width:2px;background:var(--ref);opacity:.85}
+.refcaja{position:relative;height:18px}
+.reftexto{position:absolute;font-size:.72rem;color:var(--ref);font-weight:600;transform:translateX(-50%);white-space:nowrap}
+@media (max-width:520px){ .gfila{grid-template-columns:4.5rem 1fr 4.2rem} }
+
+/* matriz */
+.matriz{overflow-x:auto}
+table{border-collapse:separate;border-spacing:2px;font-size:.82rem}
+th{font-weight:600;color:var(--muted);font-size:.72rem;letter-spacing:.05em;
+  text-transform:uppercase;padding:4px 6px;text-align:center;white-space:nowrap}
+th.lado{text-align:right}
+td{width:56px;height:38px;text-align:center;border-radius:4px;
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--ground);
+  font-size:.78rem;padding:6px 9px;border-radius:6px;opacity:0;transition:opacity .12s;z-index:9}
+@media (prefers-reduced-motion: reduce){ .tip{transition:none} }
+.aviso{border-left:3px solid var(--accent);background:var(--accent-soft);
+  padding:12px 14px;border-radius:0 8px 8px 0;font-size:.9rem;color:var(--ink-2)}
+footer{font-size:.78rem;color:var(--muted);border-top:1px solid var(--line);padding-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header style="display:flex;flex-direction:column;gap:8px">
+    <p class="eyebrow">Unidad 2 · Psicología de la Emoción</p>
+    <div class="fila">
+      <h1>Resultados del curso</h1>
+      <button id="btnActualizar" class="btn-ghost">Actualizar</button>
+    </div>
+    <p class="muted" id="resumen">Cargando…</p>
+  </header>
+
+  <p class="aviso" id="avisoDemo" style="display:none">
+    Estos son <strong>datos de ejemplo</strong>: la planilla todavía no está configurada en <code>config.js</code>.
+    Sirven para ver cómo se verá la página cuando el curso responda.
+  </p>
+
+  <section class="card">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <h2>Acierto global</h2>
+      <p class="xsmall">Proporción de expresiones identificadas correctamente, sobre el total de ensayos del curso.</p>
+    </div>
+    <div class="hero">
+      <span class="cifra" id="heroCifra">—</span>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span class="pastilla" id="heroIC">—</span>
+        <p class="small muted" id="heroTexto">—</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <h2>Acierto por expresión</h2>
+      <p class="xsmall">La línea marca el 16,7 % que se esperaría respondiendo al azar entre seis opciones.</p>
+    </div>
+    <div class="grafico" id="gAcierto"></div>
+  </section>
+
+  <section class="card">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <h2>Tiempo de respuesta por expresión</h2>
+      <p class="xsmall">Mediana de milisegundos desde la aparición del rostro hasta la respuesta.</p>
+    </div>
+    <div class="grafico" id="gTiempo"></div>
+  </section>
+
+  <section class="card">
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <h2>Qué se confundió con qué</h2>
+      <p class="xsmall">Cada fila es la expresión mostrada; cada columna, la respuesta elegida. Los valores son porcentajes de la fila.</p>
+    </div>
+    <div class="matriz" id="gMatriz"></div>
+  </section>
+
+  <footer>
+    <p>Estímulos: FACES — Ebner, Riediger y Lindenberger (2010), subconjunto de acceso público, con fines docentes. Psicología del Aprendizaje, Motivación y Emoción · Universidad de O'Higgins.</p>
+  </footer>
+</div>
+<div class="tip" id="tip"></div>
+
+<script src="config.js"></script>
+<script>
+(function(){
+  "use strict";
+  var CFG = window.CONFIG || {};
+  var EMOS = [
+    {k:"alegria", et:"Alegría"},{k:"tristeza",et:"Tristeza"},{k:"miedo",et:"Miedo"},
+    {k:"ira",et:"Ira"},{k:"asco",et:"Asco"},{k:"neutral",et:"Neutral"}
+  ];
+  var AZAR = 1/6;
+  var SEQ = ["--seq1","--seq2","--seq3","--seq4","--seq5"];
+  var $ = function(s){ return document.querySelector(s); };
+  var tip = $("#tip");
+
+  function pct(x){ return (x*100).toFixed(1).replace(".",",") + " %"; }
+  function mediana(xs){
+    if(!xs.length) return 0;
+    var a = xs.slice().sort(function(p,q){ return p-q; }), m = Math.floor(a.length/2);
+    return a.length % 2 ? a[m] : (a[m-1]+a[m])/2;
+  }
+  function wilson(k, n){
+    if(!n) return [0,0];
+    var z = 1.96, p = k/n, d = 1 + z*z/n;
+    var c = (p + z*z/(2*n)) / d;
+    var h = z * Math.sqrt(p*(1-p)/n + z*z/(4*n*n)) / d;
+    return [Math.max(0, c-h), Math.min(1, c+h)];
+  }
+  function parseCSV(txt){
+    var filas = [], f = [], val = "", i, c, q = false;
+    for(i = 0; i < txt.length; i++){
+      c = txt[i];
+      if(q){
+        if(c === '"'){ if(txt[i+1] === '"'){ val += '"'; i++; } else q = false; }
+        else val += c;
+      }else if(c === '"'){ q = true; }
+      else if(c === ","){ f.push(val); val = ""; }
+      else if(c === "\n"){ f.push(val); filas.push(f); f = []; val = ""; }
+      else if(c !== "\r"){ val += c; }
+    }
+    if(val.length || f.length){ f.push(val); filas.push(f); }
+    return filas.filter(function(r){ return r.length > 1; });
+  }
+
+  function mostrarTip(ev, texto){
+    tip.textContent = texto;
+    tip.style.opacity = "1";
+    tip.style.left = Math.min(window.innerWidth - 200, ev.clientX + 12) + "px";
+    tip.style.top = (ev.clientY - 34) + "px";
+  }
+  function ocultarTip(){ tip.style.opacity = "0"; }
+
+  // ------------------------------------------------------------- gráficos
+  function barras(cont, filas, maxValor, fmt, refProp){
+    cont.innerHTML = "";
+    if(refProp != null){
+      var caja = document.createElement("div");
+      caja.className = "refcaja";
+      var t = document.createElement("span");
+      t.className = "reftexto";
+      t.textContent = "azar 16,7 %";
+      t.style.left = "calc(5.5rem + 12px + (100% - 5.5rem - 4.6rem - 24px) * " + refProp + ")";
+      caja.appendChild(t);
+      cont.appendChild(caja);
+    }
+    filas.forEach(function(f){
+      var d = document.createElement("div");
+      d.className = "gfila";
+      var ancho = maxValor ? Math.max(0.5, (f.valor / maxValor) * 100) : 0;
+      d.innerHTML =
+        '<span class="getiqueta">' + f.etiqueta + '</span>' +
+        '<span class="gpista"><span class="gbarra" style="width:' + ancho + '%"></span></span>' +
+        '<span class="gvalor">' + fmt(f.valor) + '</span>';
+      if(refProp != null){
+        var r = document.createElement("span");
+        r.className = "referencia";
+        r.style.left = (refProp * 100) + "%";
+        d.querySelector(".gpista").appendChild(r);
+      }
+      d.addEventListener("mousemove", function(ev){ mostrarTip(ev, f.tip); });
+      d.addEventListener("mouseleave", ocultarTip);
+      cont.appendChild(d);
+    });
+  }
+
+  function matriz(cont, conteo){
+    cont.innerHTML = "";
+    var tb = document.createElement("table");
+    var thead = document.createElement("tr");
+    thead.innerHTML = "<th></th>" + EMOS.map(function(e){ return "<th>" + e.et + "</th>"; }).join("");
+    tb.appendChild(thead);
+    EMOS.forEach(function(fila){
+      var tot = EMOS.reduce(function(a,c){ return a + (conteo[fila.k][c.k] || 0); }, 0);
+      var tr = document.createElement("tr");
+      var th = document.createElement("th");
+      th.className = "lado"; th.textContent = fila.et;
+      tr.appendChild(th);
+      EMOS.forEach(function(col){
+        var n = conteo[fila.k][col.k] || 0;
+        var p = tot ? n / tot : 0;
+        var paso = p === 0 ? 0 : Math.min(4, Math.floor(p * 5));
+        var td = document.createElement("td");
+        td.style.background = "var(" + SEQ[paso] + ")";
+        td.style.color = paso >= 3 ? "var(--seq-ink-alto)" : "var(--seq-ink-bajo)";
+        td.textContent = tot ? Math.round(p * 100) : "—";
+        td.addEventListener("mousemove", function(ev){
+          mostrarTip(ev, fila.et + " → " + col.et + ": " + n + " de " + tot + " (" + pct(p) + ")");
+        });
+        td.addEventListener("mouseleave", ocultarTip);
+        tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    cont.appendChild(tb);
+  }
+
+  // ------------------------------------------------------------- render
+  function render(filas){
+    var enc = filas[0].map(function(s){ return s.trim(); });
+    var iEmo = enc.indexOf("emocion_mostrada"), iResp = enc.indexOf("respuesta"),
+        iOk = enc.indexOf("correcto"), iRt = enc.indexOf("rt_ms"), iSes = enc.indexOf("sesion");
+    var datos = filas.slice(1).filter(function(f){ return f[iEmo]; }).map(function(f){
+      return {emo:f[iEmo].trim(), resp:f[iResp].trim(), ok:+f[iOk], rt:+f[iRt], ses:f[iSes]};
+    });
+    if(!datos.length){
+      $("#resumen").textContent = "Todavía no hay respuestas registradas.";
+      return;
+    }
+    var sesiones = {}; datos.forEach(function(d){ sesiones[d.ses] = 1; });
+    var nSes = Object.keys(sesiones).length;
+    $("#resumen").textContent = nSes + (nSes === 1 ? " participante" : " participantes") +
+      " · " + datos.length + " ensayos · actualizado " +
+      new Date().toLocaleTimeString("es-CL", {hour:"2-digit", minute:"2-digit"});
+
+    var ok = datos.filter(function(d){ return d.ok === 1; }).length;
+    var prop = ok / datos.length, ic = wilson(ok, datos.length);
+    $("#heroCifra").textContent = pct(prop);
+    $("#heroIC").textContent = "IC 95 % " + pct(ic[0]) + " – " + pct(ic[1]);
+    $("#heroTexto").textContent = ic[0] > AZAR
+      ? "El intervalo de confianza no incluye el 16,7 % esperado por azar: el acuerdo del curso sobre qué expresa cada rostro es sistemático."
+      : "El intervalo de confianza todavía incluye el valor esperado por azar. Con más participantes la estimación se afina.";
+
+    var porEmo = EMOS.map(function(e){
+      var ds = datos.filter(function(d){ return d.emo === e.k; });
+      var k = ds.filter(function(d){ return d.ok === 1; }).length;
+      return {e:e, n:ds.length, k:k, p:ds.length ? k/ds.length : 0, rt:mediana(ds.map(function(d){ return d.rt; }))};
+    });
+
+    barras($("#gAcierto"), porEmo.map(function(r){
+      return {etiqueta:r.e.et, valor:r.p, tip:r.e.et + ": " + r.k + " aciertos de " + r.n + " ensayos"};
+    }), 1, pct, AZAR);
+
+    var maxRt = Math.max.apply(null, porEmo.map(function(r){ return r.rt; })) || 1;
+    barras($("#gTiempo"), porEmo.map(function(r){
+      return {etiqueta:r.e.et, valor:r.rt, tip:r.e.et + ": mediana " + Math.round(r.rt) + " ms en " + r.n + " ensayos"};
+    }), maxRt, function(v){ return Math.round(v) + " ms"; }, null);
+
+    var conteo = {};
+    EMOS.forEach(function(a){ conteo[a.k] = {}; EMOS.forEach(function(b){ conteo[a.k][b.k] = 0; }); });
+    datos.forEach(function(d){ if(conteo[d.emo] && conteo[d.emo][d.resp] != null) conteo[d.emo][d.resp]++; });
+    matriz($("#gMatriz"), conteo);
+  }
+
+  // ------------------------------------------------------------- datos
+  function ejemplo(){
+    var acc = {alegria:.96, tristeza:.74, miedo:.55, ira:.71, asco:.68, neutral:.83};
+    var conf = {alegria:"neutral", tristeza:"neutral", miedo:"tristeza", ira:"asco", asco:"ira", neutral:"tristeza"};
+    var rt = {alegria:1250, tristeza:1900, miedo:2250, ira:1750, asco:1980, neutral:1600};
+    var filas = [["fecha","sesion","curso","ensayo","archivo","emocion_mostrada","respuesta","correcto","rt_ms","modelo","edad_modelo","sexo_modelo"]];
+    var s, i, e, correcto, resp;
+    for(s = 0; s < 24; s++){
+      for(i = 0; i < EMOS.length * 3; i++){
+        e = EMOS[i % EMOS.length].k;
+        correcto = Math.random() < acc[e];
+        resp = correcto ? e : (Math.random() < .6 ? conf[e] : EMOS[Math.floor(Math.random()*6)].k);
+        filas.push(["", "demo" + s, "ejemplo", i+1, "s00.jpg", e, resp, correcto ? 1 : 0,
+                    Math.round(rt[e] * (0.7 + Math.random()*0.7)), "000", "joven", "femenino"]);
+      }
+    }
+    return filas;
+  }
+
+  function cargar(){
+    if(!CFG.csvUrl){
+      $("#avisoDemo").style.display = "block";
+      render(ejemplo());
+      return;
+    }
+    $("#resumen").textContent = "Cargando…";
+    fetch(CFG.csvUrl + (CFG.csvUrl.indexOf("?") > -1 ? "&" : "?") + "t=" + Date.now())
+      .then(function(r){ if(!r.ok) throw new Error(r.status); return r.text(); })
+      .then(function(t){ render(parseCSV(t)); })
+      .catch(function(){
+        $("#resumen").textContent = "No se pudo leer la planilla. Revisa que esté publicada como CSV y que la dirección en config.js sea correcta.";
+      });
+  }
+
+  $("#btnActualizar").addEventListener("click", cargar);
+  cargar();
+  setInterval(cargar, 20000);
+})();
+</script>
+</body>
+</html>
