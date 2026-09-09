@@ -6,7 +6,7 @@ window.CONFIG = {
   // 1) URL de la aplicación web de Apps Script (termina en /exec).
   //    Mientras esté vacía, el experimento funciona igual pero no envía datos:
   //    cada estudiante descarga su archivo CSV al terminar.
-  endpoint: "",
+  endpoint: "https://script.google.com/macros/s/AKfycbyyLuvf-PCPvhbsbX5xkKRkItJzZvg8CpcrLcEUgtG3AA_RCuApGFVN7U3GKvMOLEnz/exec",
 
   // 2) URL del CSV publicado de la planilla, para la página de resultados.
   //    En la planilla: Archivo > Compartir > Publicar en la web > CSV.
