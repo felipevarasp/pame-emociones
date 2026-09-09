@@ -77,7 +77,7 @@ rostro reciba una etiqueta emocional.
 window.CONFIG = {
   endpoint: "https://script.google.com/macros/s/AKfy.../exec",
   csvUrl:   "https://docs.google.com/spreadsheets/d/e/2PACX.../pub?gid=0&single=true&output=csv",
-  curso:    "PAME 2026 - Seccion 1"
+  curso:    "PAME 2026 - Seccion 2"
 };
 ```
 
